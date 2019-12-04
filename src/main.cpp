@@ -1,11 +1,13 @@
 #include <iostream>
 #include <fstream>
+#include <random>
 
 #include <Eigen/Dense>
 
 #include "sphere.h"
 #include "hitable_list.h"
 #include "float.h"
+#include "camera.h"
 
 
 using namespace std; using namespace Eigen;
@@ -29,6 +31,7 @@ int main()
 
 	int nx = 200;
     int ny = 100;
+    int ns = 100; // number of samples per pixel
     
     imageFile << "P3\n" << nx << " "<< ny << "\n255\n";
 
@@ -37,21 +40,32 @@ int main()
     Vector3f vertical(0.0, 2.0, 0.0);   // the vertical extents of the image
     Vector3f origin(0.0, 0.0, 0.0); // the origin of the camera location
 
+    // create the world of hitables
     hitable *list[2];
     list[0] = new sphere(Vector3f(0, 0, -1), 0.5);
     list[1] = new sphere(Vector3f(0, -100.5, -1.0), 100);
     hitable *world = new hitable_list(list, 2);
+
+    // create the camera
+    camera cam;
+
+    // create random number generator between [0, 1)
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(0, 1); //uniform distribution between 0 and 1
     
     for (int j = ny-1; j >= 0; j--) {
         for (int i=0; i < nx; i++) {
 
-            float u = float(i) / float(nx);
-            float v = float(j) / float(ny);
-
-            // the ray direction here is not normalized for simpler and faster code
-            ray r(origin, lower_left_corner + u * horizontal + v * vertical);
-            Vector3f p = r.point_at_parameter(2.0);
-            Vector3f col = color(r, world);
+            Vector3f col(0, 0, 0);
+            for (int s=0; s < ns; s++) {
+                float u = float(i + dis(gen)) / float(nx);
+                float v = float(j+ dis(gen)) / float(ny);
+                
+                ray r = cam.get_ray(u, v);
+                col += color(r, world);
+            }
+            col /= float(ns);
 
             int ir = int (255.99 * col[0]);
             int ig = int (255.99 * col[1]);
