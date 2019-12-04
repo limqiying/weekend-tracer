@@ -32,7 +32,8 @@ Vector3f random_in_unit_sphere()
 Vector3f color(const ray& r, hitable *world) 
 {
     hit_record rec;
-    if (world->hit(r, 0.0, MAXFLOAT, rec)) {
+    // do an offset from tmin = 0 to avoid reflection detected off reflected surfaces
+    if (world->hit(r, 0.001, MAXFLOAT, rec)) {
         Vector3f target = rec.p + rec.normal + random_in_unit_sphere();
         // reflect the ray off the hit point in direction from hitpoint to the randomly picked target
         // multiply by 0.5 as spheres only absort half the energy on each bounce
@@ -86,7 +87,8 @@ int main()
                 col += color(r, world);
             }
             col /= float(ns);
-
+            // gamma2 (raise color to power 1/2)
+            col = Vector3f(sqrt(col[0]), sqrt(col[1]), sqrt(col[2]));
             int ir = int (255.99 * col[0]);
             int ig = int (255.99 * col[1]);
             int ib = int (255.99 * col[2]);
