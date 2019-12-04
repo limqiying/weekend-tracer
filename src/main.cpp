@@ -12,11 +12,31 @@
 
 using namespace std; using namespace Eigen;
 
+Vector3f random_in_unit_sphere()
+{
+    /*
+    * returns a random point that falls in a unit sphere centered at (0, 0, 0)
+    */
+   Vector3f p;
+   // create random number generator between [0, 1)
+   std::random_device rd;
+   std::mt19937 gen(rd());
+   std::uniform_real_distribution<> dis(0, 1); //uniform distribution between 0 and 1
+   do {
+       // p falls in the square of length [-1, 1] ^ 3
+       p = 2.0 * Vector3f(dis(gen), dis(gen), dis(gen)) - Vector3f::Ones();
+   } while (p.dot(p) >= 1.0);
+   return p;
+}
+
 Vector3f color(const ray& r, hitable *world) 
 {
     hit_record rec;
     if (world->hit(r, 0.0, MAXFLOAT, rec)) {
-        return 0.5 * (rec.normal + Vector3f::Ones());
+        Vector3f target = rec.p + rec.normal + random_in_unit_sphere();
+        // reflect the ray off the hit point in direction from hitpoint to the randomly picked target
+        // multiply by 0.5 as spheres only absort half the energy on each bounce
+        return 0.5 * color(ray(rec.p, target - rec.p), world);
     } else {
         Vector3f unit_direction = r.direction().normalized();
         float t = 0.5 * (unit_direction.y() + 1.0);
