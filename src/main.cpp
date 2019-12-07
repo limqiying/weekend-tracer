@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <random>
 
 #include <Eigen/Dense>
 
@@ -10,18 +9,21 @@
 #include "camera.h"
 #include "utils.h"
 
-
 using namespace std; using namespace Eigen;
 
-Vector3f color(const ray& r, hitable *world) 
+Vector3f color(const ray& r, hitable *world, int depth) 
 {
     hit_record rec;
     // do an offset from tmin = 0 to avoid reflection detected off reflected surfaces
     if (world->hit(r, 0.001, MAXFLOAT, rec)) {
+        ray scattered;
+        Vector3f attenuation;
+        if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+            return attenuation.cwiseProduct(color(scattered, world, depth+1));
+        } else {
+            return Vector3f::Zero();
+        }
         Vector3f target = rec.p + rec.normal + random_in_unit_sphere();
-        // reflect the ray off the hit point in direction from hitpoint to the randomly picked target
-        // multiply by 0.5 as spheres only absort half the energy on each bounce
-        return 0.5 * color(ray(rec.p, target - rec.p), world);
     } else {
         Vector3f unit_direction = r.direction().normalized();
         float t = 0.5 * (unit_direction.y() + 1.0);
@@ -34,8 +36,8 @@ int main()
     ofstream imageFile;
     imageFile.open("output.ppm");
 
-	int nx = 200;
-    int ny = 100;
+	int nx = 1000;
+    int ny = 500;
     int ns = 100; // number of samples per pixel
     
     imageFile << "P3\n" << nx << " "<< ny << "\n255\n";
@@ -47,8 +49,8 @@ int main()
 
     // create the world of hitables
     hitable *list[2];
-    list[0] = new sphere(Vector3f(0, 0, -1), 0.5);
-    list[1] = new sphere(Vector3f(0, -100.5, -1.0), 100);
+    list[0] = new sphere(Vector3f(0, 0, -1), 0.5, new lambertian(Vector3f(0.8, 0.3, 0.3)));
+    list[1] = new sphere(Vector3f(0, -100.5, -1.0), 100, new lambertian(Vector3f(0.8, 0.8, 0.0)));
     hitable *world = new hitable_list(list, 2);
 
     // create the camera
@@ -68,7 +70,7 @@ int main()
                 float v = float(j+ dis(gen)) / float(ny);
                 
                 ray r = cam.get_ray(u, v);
-                col += color(r, world);
+                col += color(r, world, 0);
             }
             col /= float(ns);
             // gamma2 (raise color to power 1/2)
