@@ -8,8 +8,8 @@
 class Camera 
 {
     public:
-        Camera();
-        Ray get_ray(float u, float v);
+        Camera(Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f, float, float);
+        Ray get_ray(float, float);
         Eigen::Vector3f origin;
         Eigen::Vector3f lower_left_corner;
         Eigen::Vector3f horizontal;

@@ -42,20 +42,22 @@ int main()
     
     imageFile << "P3\n" << nx << " "<< ny << "\n255\n";
 
-    Vector3f lower_left_corner(-2.0, -1.0, -1.0);   // the lower left hand cordiner of the 200 x 100 image
-    Vector3f horizontal(4.0, 0.0, 0.0); // the horizontal extents of the image
-    Vector3f vertical(0.0, 2.0, 0.0);   // the vertical extents of the image
-    Vector3f origin(0.0, 0.0, 0.0); // the origin of the camera location
-
     // create the world of hitables
-    Hitable *list[4];
+    Hitable *list[5];
     list[0] = new Sphere(Vector3f(0, 0, -1), 0.5, new Lambertian(Vector3f(0.8, 0.3, 0.3)));
     list[1] = new Sphere(Vector3f(0, -100.5, -1.0), 100, new Lambertian(Vector3f(0.8, 0.8, 0.0)));
     list[2] = new Sphere(Vector3f(1, 0, -1), 0.5, new Metal(Vector3f(0.8, 0.6, 0.2), 0.3));
     list[3] = new Sphere(Vector3f(-1, 0, -1), 0.5, new Dielectric(1.5));
-    Hitable *world = new HitableList(list, 4);
+    list[4] = new Sphere(Vector3f(-1, 0, -1), -0.45, new Dielectric(1.5));
+    Hitable *world = new HitableList(list, 5);
 
-    Camera cam;
+    // Hitable *list[2];
+    // float R = cos(M_PI / 4);
+    // list[0] = new Sphere(Vector3f(-R, 0, -1), R, new Lambertian(Vector3f(0.8, 0.3, 0.3)));
+    // list[1] = new Sphere(Vector3f(R, 0, -1), R, new Lambertian(Vector3f(0.8, 0.8, 0.0)));
+    // Hitable *world = new HitableList(list, 2);
+
+    Camera cam(Vector3f(-2, 2, 1), Vector3f(0, 0, -1), Vector3f(0, 1, 0), 45, float(nx)/float(ny));
 
     for (int j = ny-1; j >= 0; j--) {
         for (int i=0; i < nx; i++) {
