@@ -51,7 +51,7 @@ static bool refract(const Eigen::Vector3f& v, const Eigen::Vector3f& n, float ni
 inline static float schlick(float cosine, float refractiveIndex) {
     float r0 = (1 - refractiveIndex) / (1 + refractiveIndex);
     r0 = r0 * r0;
-    return r0 + (1 - r0) * pow((1 - cosine), 5);
+    return r0 + (1 - r0) * pow((1.0f - cosine), 5);
 }
 
 inline static Eigen::Vector3f reflect(const Eigen::Vector3f& v, const Eigen::Vector3f& n) {
