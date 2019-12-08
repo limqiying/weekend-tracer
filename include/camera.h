@@ -7,13 +7,13 @@
 
 class Camera 
 {
+    Eigen::Vector3f origin, lower_left_corner, horizontal, vertical;
+    Eigen::Vector3f u, w, v;
+    float lens_radius;
+    
     public:
-        Camera(Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f, float, float);
+        Camera(Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f, float, float, float, float);
         Ray get_ray(float, float);
-        Eigen::Vector3f origin;
-        Eigen::Vector3f lower_left_corner;
-        Eigen::Vector3f horizontal;
-        Eigen::Vector3f vertical;
 
         ~Camera();
 };
