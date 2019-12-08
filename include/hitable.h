@@ -1,23 +1,47 @@
-#ifndef HITABLEH
-#define HITABLEH
+#ifndef HITABLE_H
+#define HITABLE_H
 
-#include "ray.h"
 #include <Eigen/Dense>
 
-class material;
+#include "ray.h"
 
-struct hit_record 
+class Material;
+
+struct HitRecord 
 {
     float t;
     Eigen::Vector3f p;
     Eigen::Vector3f normal;  
-    material *mat_ptr;
+    Material *mat_ptr;
 };
 
-class hitable 
+class Hitable 
 {
     public: 
-        virtual bool hit(const ray& r, float t_min, float t_max, hit_record& rec) const = 0;
+        virtual bool hit(const Ray& r, float t_min, float t_max, HitRecord& rec) const = 0;
 };
 
-#endif /* HITABLEH */
+class Sphere: public Hitable 
+{
+    public:
+        Sphere();
+        Sphere(Eigen::Vector3f c, float r, Material* m);
+        bool hit(const Ray &r, float tmin, float tmax, HitRecord &rec) const;
+        Eigen::Vector3f center;
+        float radius;
+        Material* mat;
+        ~Sphere();
+};
+
+class HitableList: public Hitable 
+{
+    public:
+         HitableList();
+         HitableList(Hitable **l, int n);
+         bool hit(const Ray& r, float tmin, float tmax, HitRecord &rec) const;
+         Hitable **list;
+         int list_size;
+         ~HitableList();
+};
+
+#endif /* HITABLE_H */

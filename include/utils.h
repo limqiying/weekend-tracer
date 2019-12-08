@@ -1,10 +1,11 @@
-#ifndef UTILSH
-#define UTILSH
+#ifndef UTILS_H
+#define UTILS_H
 
 #include <random>
+
 #include <Eigen/Dense>
 
-Eigen::Vector3f random_in_unit_sphere()
+static Eigen::Vector3f random_in_unit_sphere()
 {
     /*
     * returns a random point that falls in a unit sphere centered at (0, 0, 0)
@@ -21,8 +22,8 @@ Eigen::Vector3f random_in_unit_sphere()
    return p;
 }
 
-Eigen::Vector3f reflect(const Eigen::Vector3f& v, const Eigen::Vector3f& n) {
+inline static Eigen::Vector3f reflect(const Eigen::Vector3f& v, const Eigen::Vector3f& n) {
     return v - 2 * v.dot(n) * n;
 }
 
-#endif /* UTILSH */
+#endif /* UTILS_H */

@@ -2,21 +2,21 @@
 #include <fstream>
 
 #include <Eigen/Dense>
-
-#include "sphere.h"
-#include "hitable_list.h"
 #include "float.h"
+
+#include "hitable.h"
 #include "camera.h"
 #include "utils.h"
+#include "material.h"
 
 using namespace std; using namespace Eigen;
 
-Vector3f color(const ray& r, hitable *world, int depth) 
+Vector3f color(const Ray& r, Hitable *world, int depth) 
 {
-    hit_record rec;
+    HitRecord rec;
     // do an offset from tmin = 0 to avoid reflection detected off reflected surfaces
     if (world->hit(r, 0.001, MAXFLOAT, rec)) {
-        ray scattered;
+        Ray scattered;
         Vector3f attenuation;
         if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
             return attenuation.cwiseProduct(color(scattered, world, depth+1));
@@ -36,8 +36,8 @@ int main()
     ofstream imageFile;
     imageFile.open("output.ppm");
 
-	int nx = 1000;
-    int ny = 500;
+	int nx = 200;
+    int ny = 100;
     int ns = 100; // number of samples per pixel
     
     imageFile << "P3\n" << nx << " "<< ny << "\n255\n";
@@ -48,13 +48,14 @@ int main()
     Vector3f origin(0.0, 0.0, 0.0); // the origin of the camera location
 
     // create the world of hitables
-    hitable *list[2];
-    list[0] = new sphere(Vector3f(0, 0, -1), 0.5, new lambertian(Vector3f(0.8, 0.3, 0.3)));
-    list[1] = new sphere(Vector3f(0, -100.5, -1.0), 100, new lambertian(Vector3f(0.8, 0.8, 0.0)));
-    hitable *world = new hitable_list(list, 2);
+    Hitable *list[4];
+    list[0] = new Sphere(Vector3f(0, 0, -1), 0.5, new Lambertian(Vector3f(0.8, 0.3, 0.3)));
+    list[1] = new Sphere(Vector3f(0, -100.5, -1.0), 100, new Lambertian(Vector3f(0.8, 0.8, 0.0)));
+    list[2] = new Sphere(Vector3f(1, 0, -1), 0.5, new Metal(Vector3f(0.8, 0.6, 0.2), 0.3));
+    list[3] = new Sphere(Vector3f(-1, 0, -1), 0.5, new Metal(Vector3f(0.8, 0.8, 0.8), 0.8));
+    Hitable *world = new HitableList(list, 4);
 
-    // create the camera
-    camera cam;
+    Camera cam;
 
     // create random number generator between [0, 1)
     std::random_device rd;
@@ -69,7 +70,7 @@ int main()
                 float u = float(i + dis(gen)) / float(nx);
                 float v = float(j+ dis(gen)) / float(ny);
                 
-                ray r = cam.get_ray(u, v);
+                Ray r = cam.get_ray(u, v);
                 col += color(r, world, 0);
             }
             col /= float(ns);

@@ -1,45 +1,32 @@
-#ifndef MATERIALH
-#define MATERIALH
+#ifndef MATERIAL_H
+#define MATERIAL_H
 
 #include <Eigen/Dense>
+
 #include "hitable.h"
 #include "utils.h"
 
-class material 
-{
+class Material {
     public:
-        virtual bool scatter(const ray& r_in, const hit_record& rec, Eigen::Vector3f& attentuation, ray& scattered) const = 0;
+        virtual bool scatter(const Ray& r_in, const HitRecord& rec, Eigen::Vector3f& attentuation, Ray& scattered) const = 0;
 };
 
-class lambertian : public material 
-{
+class Lambertian : public Material {
     public:
-        lambertian(const Eigen::Vector3f& a): albedo(a) {}
-
-        virtual bool scatter(const ray& r_in, const hit_record &rec, Eigen::Vector3f& attenuation, ray& scattered) const {
-            Eigen::Vector3f target = rec.p + rec.normal + random_in_unit_sphere();
-            scattered = ray(rec.p, target - rec.p);
-            attenuation = albedo;
-            return true;
-        }
-
+        Lambertian(const Eigen::Vector3f& a);
+        bool scatter(const Ray& r_in, const HitRecord &rec, Eigen::Vector3f& attenuation, Ray& scattered) const;
         Eigen::Vector3f albedo;
-
+        ~Lambertian();
 };
 
-class metal: public material
-{
+class Metal: public Material {
     public:
-        metal(const Eigen::Vector3f &a): albedo(a) {}
-
-        virtual bool scatter(const ray& r_in, const hit_record &rec, Eigen::Vector3f& attenuation, ray& scattered) const {
-            Eigen::Vector3f reflected = reflect(r_in.direction().normalized(), rec.normal);
-            scattered = ray(rec.p, reflected);
-            attenuation = albedo;
-            return scattered.direction().dot(rec.normal) > 0;
-        }
-
+        Metal(const Eigen::Vector3f &a);
+        Metal(const Eigen::Vector3f &a, float f);
+        bool scatter(const Ray& r_in, const HitRecord &rec, Eigen::Vector3f& attenuation, Ray& scattered) const;
         Eigen::Vector3f albedo;
+        float fuzz;
+        ~Metal();
 };
 
-#endif /* MATERIALH */
+#endif /* MATERIAL_H */
