@@ -29,4 +29,12 @@ class Metal: public Material {
         ~Metal();
 };
 
+class Dielectric: public Material {
+    public:
+        Dielectric(float ri);
+        bool scatter(const Ray& r_in, const HitRecord &rec, Eigen::Vector3f& attenuation, Ray& scattered) const;
+        float refractionIndex;
+        ~Dielectric();
+};
+
 #endif /* MATERIAL_H */

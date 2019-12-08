@@ -52,24 +52,18 @@ int main()
     list[0] = new Sphere(Vector3f(0, 0, -1), 0.5, new Lambertian(Vector3f(0.8, 0.3, 0.3)));
     list[1] = new Sphere(Vector3f(0, -100.5, -1.0), 100, new Lambertian(Vector3f(0.8, 0.8, 0.0)));
     list[2] = new Sphere(Vector3f(1, 0, -1), 0.5, new Metal(Vector3f(0.8, 0.6, 0.2), 0.3));
-    list[3] = new Sphere(Vector3f(-1, 0, -1), 0.5, new Metal(Vector3f(0.8, 0.8, 0.8), 0.8));
+    list[3] = new Sphere(Vector3f(-1, 0, -1), 0.5, new Dielectric(1.5));
     Hitable *world = new HitableList(list, 4);
 
     Camera cam;
 
-    // create random number generator between [0, 1)
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(0, 1); //uniform distribution between 0 and 1
-    
     for (int j = ny-1; j >= 0; j--) {
         for (int i=0; i < nx; i++) {
 
             Vector3f col(0, 0, 0);
             for (int s=0; s < ns; s++) {
-                float u = float(i + dis(gen)) / float(nx);
-                float v = float(j+ dis(gen)) / float(ny);
-                
+                float u = float(i + getRandom()) / float(nx);
+                float v = float(j+ getRandom()) / float(ny);
                 Ray r = cam.get_ray(u, v);
                 col += color(r, world, 0);
             }
